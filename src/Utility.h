@@ -43,8 +43,8 @@ extern int previous_hmd_data;
 extern int current_temp_data;
 extern int current_hmd_data;
 
-extern bool temp_flag{true};
-extern bool hmd_flag{true};
+extern bool temp_flag;
+extern bool hmd_flag;
 
 extern LiquidCrystal_I2C lcd;
 
