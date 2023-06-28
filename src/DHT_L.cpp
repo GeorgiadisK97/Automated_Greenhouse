@@ -7,7 +7,6 @@ DHT_L::DHT_L(uint8_t pin, uint8_t DHT_TYPE)
 
 void DHT_L::begin()
 {
-    Serial.println("DHT Sensor initialized");
     _dht.begin();
 }
 
@@ -21,5 +20,5 @@ bool DHT_L::check_data(int &DHT_THRESHOLD)
 {
     int value;
     value = read();
-    return (value > DHT_THRESHOLD ? true : false);
+    return (value >= DHT_THRESHOLD ? true : false);
 }
