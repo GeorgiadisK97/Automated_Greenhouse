@@ -9,7 +9,7 @@ const char *SSID = "COSMOTE-458524";
 const char *PASSWORD = "ehm9mk3b5k4xk1ex";
 
 // The String below "webpage" contains the complete HTML code that is sent to the client whenever someone connects to the webserver
-String webpage = "<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width, initial-scale=1.0'><style>h1 {text-align: center;}p {text-align: center;}</style><title>Page Title</title></head><body style='background-color: #EEEEEE;'><span style='color: #003366;'><h1>Automated Greenhouse</h1><p>Current Temperature Threshold: <span id='DHT_THRESHOLD'>-</span></p><p>Current Humidity Threshold: <span id='HMD_THRESHOLD'>-</span></p><p><label for='TEMP_THRESHOLD'>Temperature Threshold:</label><input type='number' id='TEMP_THRESHOLD' name='TEMP_THRESHOLD'<br><br></p><p><label for='HMD_THRESHOLD'> Humidity Threshold:</label><input type='number' id='HMD_THRESHOLD' name='HMD_THRESHOLD'<br><br></p><p><button type='button' id='BTN_SEND_BACK'>Submit</button></p></span></body><script> var Socket; document.getElementById('BTN_SEND_BACK').addEventListener('click', button_send_back); function init() { Socket = new WebSocket('ws://' + window.location.hostname + ':81/'); Socket.onmessage = function(event) { processCommand(event); }; } function button_send_back() { var msg = {DHT_THRESHOLD: document.getElementById('TEMP_THRESHOLD').value,HMD_THRESHOLD: document.getElementById('HMD_THRESHOLD').value};Socket.send(JSON.stringify(msg)); } function processCommand(event) {var obj = JSON.parse(event.data);document.getElementById('DHT_THRESHOLD').innerHTML = obj.DHT_THRESHOLD;document.getElementById('HMD_THRESHOLD').innerHTML = obj.HMD_THRESHOLD; console.log(obj.DHT_THRESHOLD);console.log(obj.HMD_THRESHOLD); } window.onload = function(event) { init(); }</script></html>";
+String webpage = "<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width, initial-scale=1.0'><style>h1 {text-align: center;}p {text-align: center;}</style><title>Page Title</title></head><body style='background-color: #EEEEEE;'><span style='color: #003366;'><h1>Automated Greenhouse</h1><p>Current Temperature Threshold: <span id='DHT_THRESHOLD'>-</span></p><p>Current Humidity Threshold: <span id='HMD_THRESHOLD'>-</span></p><p><label for='TEMP_THRESHOLD'>Temperature Threshold:</label><input type='number' id='TEMP_THRESHOLD' name='TEMP_THRESHOLD'<br><br></p><p><label for='HUMID_THRESHOLD'> Humidity Threshold:</label><input type='number' id='HUMID_THRESHOLD' name='HUMID_THRESHOLD'<br><br></p><p><button type='button' id='BTN_SEND_BACK'>Submit</button></p></span></body><script> var Socket; document.getElementById('BTN_SEND_BACK').addEventListener('click', button_send_back); function init() { Socket = new WebSocket('ws://' + window.location.hostname + ':81/'); Socket.onmessage = function(event) { processCommand(event); }; } function button_send_back() { var msg = {DHT_THRESHOLD : document.getElementById('TEMP_THRESHOLD').value,HMD_THRESHOLD : document.getElementById('HUMID_THRESHOLD').value};Socket.send(JSON.stringify(msg)); } function processCommand(event) {var obj = JSON.parse(event.data);document.getElementById('DHT_THRESHOLD').innerHTML = obj.DHT_THRESHOLD;document.getElementById('HMD_THRESHOLD').innerHTML = obj.HMD_THRESHOLD; } window.onload = function(event) { init(); }</script></html>";
 
 // We want to periodically send values to the clients, so we need to define an "interval" and remember the last time we sent data to the client (with "previousMillis")
 int interval = 1000;              // send data to the client every 1000ms -> 1s
@@ -152,12 +152,9 @@ void loop()
 
     if (!isnan(current_temp_data)) // CHECK IF THE DATA IS VALID
     {
-      Serial.println("Temperature: " + String(current_temp_data) + " DHT_THRESHOLD " + String(DHT_THRESHOLD));
       display_temperature(current_temp_data);
       if (dht.check_data(DHT_THRESHOLD)) // IF THE DATA FROM THE SENSOR IS GREATER THAN THE THRESHOLD
       {
-        Serial.println("Check data is true");
-        Serial.println("Current temp: " + String(current_temp_data) + " Previous temp: " + String(previous_temp_data));
         if (temp_flag) // EXECUTE ONLY IF THE DATA IS DIFFERENT FROM THE PREVIOUS
         {
           temp_flag = false;
@@ -169,7 +166,6 @@ void loop()
       }
       else
       {
-        Serial.println("Check data is false");
         if (!temp_flag) // EXECUTE ONLY IF THE DATA IS DIFFERENET FROM THE PREVIOUS
         {
           temp_flag = true;
@@ -189,7 +185,6 @@ void loop()
 
     if (!isnan(current_hmd_data))
     {
-      Serial.println(current_hmd_data);
       display_moisture(current_hmd_data);
       if (hmd.check_data(HMD_THRESHOLD))
       {
