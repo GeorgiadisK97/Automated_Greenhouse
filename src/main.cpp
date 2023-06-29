@@ -80,10 +80,10 @@ void setup()
   dht.begin();
   window.attach();   
 
-  current_temp_data = dht.read(); // Read DHT data
-  display_temperature(current_temp_data);
-  previous_temp_data = current_temp_data;
-  if (!isnan(current_temp_data))
+  current_temp_data = dht.read();           // Read the data from the DHT
+  display_temperature(current_temp_data);   // Display on the LCD
+
+  if (!isnan(current_temp_data))            // Data validation
   {
     if (current_temp_data >= DHT_THRESHOLD)
     {
@@ -104,8 +104,8 @@ void setup()
   }
 
   current_hmd_data = hmd.read();
-  display_moisture(current_hmd_data);
-  previous_hmd_data = current_hmd_data;
+  display_moisture(current_hmd_data);   // Display on the LCD
+
   if (!isnan(current_hmd_data))
   {
     if (current_hmd_data >= HMD_THRESHOLD)
@@ -150,10 +150,9 @@ void loop()
     previousMillis = now;
 
     current_temp_data = dht.read(); // Read the data from the DHT
-
+    display_temperature(current_temp_data);
     if (!isnan(current_temp_data)) // Data validation
     {
-      display_temperature(current_temp_data); // Display on the LCD
       if (current_temp_data >= DHT_THRESHOLD)
       {
         if (temp_flag)
@@ -181,10 +180,9 @@ void loop()
     }
 
     current_hmd_data = map(hmd.read(), 0, 360, 0, 100);
-
+    display_moisture(current_hmd_data);
     if (!isnan(current_hmd_data))
     {
-      display_moisture(current_hmd_data);
       if (current_hmd_data >= HMD_THRESHOLD)
       {
         if (hmd_flag)
