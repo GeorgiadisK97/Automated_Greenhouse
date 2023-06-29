@@ -1,6 +1,10 @@
 # Automated Greenhouse
 
-Controlling and monitoring a small self-sustainable greenhouse using a custom website.
+Controlling and monitoring a self-sustainable greenhouse using a custom website.
+
+## Future development
+
+The current greenhouse consists of a couple of sensors and acruators. It represents the base of a scalable construction. 
 
 ## Materials used
 
@@ -14,3 +18,5 @@ Controlling and monitoring a small self-sustainable greenhouse using a custom we
 1x 12V 12.5A external power supply (LRS-150-12).  
 1x 5V 250mA external power supply.  
 1x esp32-c3-devkitC-02.
+
+
