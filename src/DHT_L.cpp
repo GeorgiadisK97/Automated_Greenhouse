@@ -15,10 +15,3 @@ int DHT_L::read()
     _dht.temperature().getEvent(&_event);
     return _event.temperature;
 }
-
-bool DHT_L::check_data(int &DHT_THRESHOLD)
-{
-    int value;
-    value = read();
-    return (value >= DHT_THRESHOLD ? true : false);
-}

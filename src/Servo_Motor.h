@@ -12,13 +12,12 @@ class Servo_motor : public Motor{
         int _MAX_PULSE_WIDTH;
         Servo servo;
     public:
-        Servo_motor(uint8_t pin);
         Servo_motor(int hz, uint8_t pin, int min, int max);
-        virtual ~Servo_motor() = default;
         virtual void open() override;
         virtual void close() override;
         virtual void display() const override;
         virtual String state() override;
-        void attach();
+        void attach();virtual
+        ~Servo_motor() = default;
 };
 #endif // _SERVO_MOTOR_H_

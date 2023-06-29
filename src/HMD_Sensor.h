@@ -11,7 +11,6 @@ private:
 public:
     HMD(uint8_t pin1, uint8_t pin2);
     virtual int read() override;
-    virtual bool check_data(int &HMD_THRESHOLD) override;
     virtual ~HMD() = default;
 };
 

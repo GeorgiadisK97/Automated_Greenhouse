@@ -9,41 +9,44 @@ const char *SSID = "SSID";
 const char *PASSWORD = "PASSWORD";
 
 // The String below "webpage" contains the complete HTML code that is sent to the client whenever someone connects to the webserver
-String webpage = "<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width, initial-scale=1.0'><style>h1 {text-align: center;}p {text-align: center;}</style><title>Page Title</title></head><body style='background-color: #EEEEEE;'><span style='color: #003366;'><h1>Automated Greenhouse</h1><p>Current Temperature Threshold: <span id='DHT_THRESHOLD'>-</span></p><p>Current Humidity Threshold: <span id='HMD_THRESHOLD'>-</span></p><p><label for='TEMP_THRESHOLD'>Temperature Threshold:</label><input type='number' id='TEMP_THRESHOLD' name='TEMP_THRESHOLD'<br><br></p><p><label for='HUMID_THRESHOLD'> Humidity Threshold:</label><input type='number' id='HUMID_THRESHOLD' name='HUMID_THRESHOLD'<br><br></p><p><button type='button' id='BTN_SEND_BACK'>Submit</button></p></span></body><script> var Socket; document.getElementById('BTN_SEND_BACK').addEventListener('click', button_send_back); function init() { Socket = new WebSocket('ws://' + window.location.hostname + ':81/'); Socket.onmessage = function(event) { processCommand(event); }; } function button_send_back() { var msg = {DHT_THRESHOLD : document.getElementById('TEMP_THRESHOLD').value,HMD_THRESHOLD : document.getElementById('HUMID_THRESHOLD').value};Socket.send(JSON.stringify(msg)); } function processCommand(event) {var obj = JSON.parse(event.data);document.getElementById('DHT_THRESHOLD').innerHTML = obj.DHT_THRESHOLD;document.getElementById('HMD_THRESHOLD').innerHTML = obj.HMD_THRESHOLD; } window.onload = function(event) { init(); }</script></html>";
+String webpage = "<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' /><style>h1 {text-align: center;}p {text-align: center;}</style><title>Page Title</title></head><body style='background-color: #EEEEEE;'><span style='color: #003366;'><h1>Greenhouse</h1><p>Current Temperature Threshold: <span id='DHT_THRESHOLD'>-</span></p><p>Current Humidity Threshold: <span id='HMD_THRESHOLD'>-</span></p><p><label for='TEMP_THRESHOLD'>Temperature Threshold:</label><input type='number' id='TEMP_THRESHOLD' name='TEMP_THRESHOLD'<br><br></p><p><label for='HUMID_THRESHOLD'> Humidity Threshold:</label><input type='number' id='HUMID_THRESHOLD' name='HUMID_THRESHOLD'<br><br></p><p><button type='button' id='BTN_SEND_BACK'>Submit</button></p><p>PUMP_STATE: <span id='PUMP_STATE'>-</span></p><p>FAN_STATE: <span id='FAN_STATE'>-</span></p><p>WINDOW_STATE: <span id='WINDOW_STATE'>-</span></p></span></body><script> var Socket; document.getElementById('BTN_SEND_BACK').addEventListener('click', button_send_back); function init() { Socket = new WebSocket('ws://' + window.location.hostname + ':81/'); Socket.onmessage = function(event) { processCommand(event); }; } function button_send_back() { var msg = {DHT_THRESHOLD : document.getElementById('TEMP_THRESHOLD').value,HMD_THRESHOLD : document.getElementById('HUMID_THRESHOLD').value};Socket.send(JSON.stringify(msg)); } function processCommand(event) {var obj = JSON.parse(event.data);document.getElementById('DHT_THRESHOLD').innerHTML = obj.DHT_THRESHOLD;document.getElementById('HMD_THRESHOLD').innerHTML = obj.HMD_THRESHOLD;document.getElementById('PUMP_STATE').innerHTML = obj.PUMP_STATE;document.getElementById('FAN_STATE').innerHTML = obj.FAN_STATE;document.getElementById('WINDOW_STATE').innerHTML = obj.WINDOW_STATE; } window.onload = function(event) { init(); }</script></html>";
 
 // We want to periodically send values to the clients, so we need to define an "interval" and remember the last time we sent data to the client (with "previousMillis")
-int interval = 1000;              // send data to the client every 1000ms -> 1s
-unsigned long previousMillis = 0; // we use the "millis()" command for time reference and this will output an unsigned long
+int interval = 1000;              // Send data to the client every 1000ms -> 1s
+unsigned long previousMillis = 0; // We use the "millis()" command for time reference and this will output an unsigned long
 
 // Initialization of webserver and websocket
-WebServer server(80);                              // the server uses port 80 (standard port for websites
-WebSocketsServer webSocket = WebSocketsServer(81); // the websocket uses port 81 (standard port for websockets
+WebServer server(80);                              // The server uses port 80 (standard port for websites
+WebSocketsServer webSocket = WebSocketsServer(81); // The websocket uses port 81 (standard port for websockets
 
 void webSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length);
 
-// Sensors Initialization
-int DHT_THRESHOLD{24};
-int HMD_THRESHOLD{60};
+// Sensors Declaration
 DHT_L dht{DHT_DATA_PIN, DHTTYPE};
 HMD hmd{HMD_DATA_PIN, HMD_POWER_PIN};
-
-int previous_temp_data{0};
-int previous_hmd_data{0};
-int current_temp_data{0};
-int current_hmd_data{0};
-
-bool temp_flag{true};
-bool hmd_flag{true};
 
 // Motors Initialization
 Fan fan{FAN_RELAY_PIN};
 Pump pump{PUMP_RELAY_PIN};
 Servo_motor window{_HZ, _SERVO_PIN, _MIN_PULSE_WIDTH, _MAX_PULSE_WIDTH};
 
+int DHT_THRESHOLD{24};
+int HMD_THRESHOLD{60};
+int previous_temp_data{0};
+int previous_hmd_data{0};
+int current_temp_data{0};
+int current_hmd_data{0};
+
+// Flags for the loop() preventing the execution of the same code
+bool temp_flag{true};
+bool hmd_flag{true};
+
 void setup()
 {
   Serial.begin(115200);
   Serial.print("Establishing network connection.(" + String(SSID) + ")");
+
+  // Establishing WiFi network connection.
   WiFi.begin(SSID, PASSWORD);
   while (WiFi.status() != WL_CONNECTED)
   {
@@ -53,41 +56,36 @@ void setup()
   Serial.print("Connected to network IP: ");
   Serial.println(WiFi.localIP());
 
-  server.on("/", []() {                     // define here what the webserver needs to do
+  server.on("/", []() {                     // Define here what the webserver needs to do
     server.send(200, "text/html", webpage); //    -> it needs to send out the HTML string "webpage" to the client
   });
   server.begin(); // start server
 
-  webSocket.begin();                 // start websocket
-  webSocket.onEvent(webSocketEvent); // define a callback function -> what does the ESP32 need to do when an event from the websocket is received? -> run function "webSocketEvent()"
+  webSocket.begin();                 // Start websocket
+  webSocket.onEvent(webSocketEvent); // Define a callback function -> what does the ESP32 need to do when an event from the websocket is received? -> run function "webSocketEvent()"
 
+  // Configure pins
   pinMode(DHT_DATA_PIN, INPUT);
   pinMode(HMD_DATA_PIN, INPUT);
   pinMode(HMD_POWER_PIN, OUTPUT);
   pinMode(FAN_RELAY_PIN, OUTPUT);
   pinMode(PUMP_RELAY_PIN, OUTPUT);
-  window.attach();
-  delay(100);
 
-  Serial.begin(115200);
+  // LCD initialization
   lcd.init();
   lcd.backlight();
-  lcd.createChar(0, droplet);
-  lcd.createChar(1, thermometer);
+  lcd.createChar(0, droplet);     // Custom character for Humidity
+  lcd.createChar(1, thermometer); // Custom character for Temperature
 
-  // Initialize device.
   dht.begin();
+  window.attach();
 
-  init_flags();
-  print_UI();
-
-  delay(2000);
   current_temp_data = dht.read(); // READ DHT SENSOR DATA
   display_temperature(current_temp_data);
   previous_temp_data = current_temp_data;
   if (!isnan(current_temp_data))
   {
-    if (dht.check_data(DHT_THRESHOLD))
+    if (current_temp_data >= DHT_THRESHOLD)
     {
       temp_flag = false;
       window.open();
@@ -110,7 +108,7 @@ void setup()
   previous_hmd_data = current_hmd_data;
   if (!isnan(current_hmd_data))
   {
-    if (hmd.check_data(HMD_THRESHOLD))
+    if (current_hmd_data >= HMD_THRESHOLD)
     {
       hmd_flag = false;
       pump.close();
@@ -133,45 +131,46 @@ void loop()
   server.handleClient(); // Needed for the webserver to handle all clients
   webSocket.loop();
 
-  unsigned long now = millis(); // read out the current "time" ("millis()" gives the time in ms since the Arduino started)
+  unsigned long now = millis(); // Read out the current "time" ("millis()" gives the time in ms since the Arduino started)
   if ((unsigned long)(now - previousMillis) > interval)
   { // check if "interval" ms has passed since last time the clients were updated
 
-    String jsonString = "";                   // create a JSON string for sending data to the client
-    StaticJsonDocument<200> doc;              // create a JSON container
-    JsonObject object = doc.to<JsonObject>(); // create a JSON Object
-    object["DHT_THRESHOLD"] = DHT_THRESHOLD;  // write data into the JSON object -> I used "rand1" and "rand2" here, but you can use anything else
+    String jsonString = "";                   // Create a JSON string for sending data to the client
+    StaticJsonDocument<200> doc;              // Create a JSON container
+    JsonObject object = doc.to<JsonObject>(); // Create a JSON Object
+    object["DHT_THRESHOLD"] = DHT_THRESHOLD;  // Write data into the JSON object
     object["HMD_THRESHOLD"] = HMD_THRESHOLD;
-    serializeJson(doc, jsonString);     // convert JSON object to string
-    Serial.println(jsonString);         // print JSON string to console for debug purposes (you can comment this out)
-    webSocket.broadcastTXT(jsonString); // send JSON string to clients
+    object["PUMP_STATE"] = pump.state();
+    object["FAN_STATE"] = fan.state();
+    object["WINDOW_STATE"] = window.state();
+    serializeJson(doc, jsonString);     // Convert JSON object to string
+    Serial.println(jsonString);         // Print JSON string to console for debug purposes
+    webSocket.broadcastTXT(jsonString); // Send JSON string to clients
 
     previousMillis = now;
 
-    current_temp_data = dht.read(); // READ DHT SENSOR DATA
+    current_temp_data = dht.read(); // Read the data from the DHT
 
-    if (!isnan(current_temp_data)) // CHECK IF THE DATA IS VALID
+    if (!isnan(current_temp_data)) // Data validation
     {
-      display_temperature(current_temp_data);
-      if (dht.check_data(DHT_THRESHOLD)) // IF THE DATA FROM THE SENSOR IS GREATER THAN THE THRESHOLD
+      display_temperature(current_temp_data); // Display on the LCD
+      if (current_temp_data >= DHT_THRESHOLD)
       {
-        if (temp_flag) // EXECUTE ONLY IF THE DATA IS DIFFERENT FROM THE PREVIOUS
+        if (temp_flag)
         {
           temp_flag = false;
           window.open();
           fan.open();
-          previous_temp_data = current_temp_data;
           print_UI();
         }
       }
       else
       {
-        if (!temp_flag) // EXECUTE ONLY IF THE DATA IS DIFFERENET FROM THE PREVIOUS
+        if (!temp_flag)
         {
           temp_flag = true;
           window.close();
           fan.close();
-          previous_temp_data = current_temp_data;
           print_UI();
         }
       }
@@ -186,24 +185,21 @@ void loop()
     if (!isnan(current_hmd_data))
     {
       display_moisture(current_hmd_data);
-      if (hmd.check_data(HMD_THRESHOLD))
+      if (current_hmd_data >= HMD_THRESHOLD)
       {
-        if (current_hmd_data != previous_hmd_data && hmd_flag)
+        if (hmd_flag)
         {
           hmd_flag = false;
           pump.close();
-
-          previous_hmd_data = current_hmd_data;
           print_UI();
         }
       }
       else
       {
-        if (current_hmd_data != previous_hmd_data && !hmd_flag)
+        if (!hmd_flag)
         {
           hmd_flag = true;
           pump.open();
-          previous_hmd_data = current_hmd_data;
           print_UI();
         }
       }
@@ -218,15 +214,15 @@ void loop()
 void webSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
 { // the parameters of this callback function are always the same -> num: id of the client who send the event, type: type of message, payload: actual data sent and length: length of payload
   switch (type)
-  {                         // switch on the type of information sent
-  case WStype_DISCONNECTED: // if a client is disconnected, then type == WStype_DISCONNECTED
+  {                         // Switch on the type of information sent
+  case WStype_DISCONNECTED: // If a client is disconnected, then type == WStype_DISCONNECTED
     Serial.println("Client " + String(num) + " disconnected");
     break;
-  case WStype_CONNECTED: // if a client is connected, then type == WStype_CONNECTED
+  case WStype_CONNECTED: // If a client is connected, then type == WStype_CONNECTED
     Serial.println("Client " + String(num) + " connected");
-    // optionally you can add code here what to do when connected
+    // Optionally you can add code here what to do when connected
     break;
-  case WStype_TEXT: // if a client has sent data, then type == WStype_TEXT
+  case WStype_TEXT: // If a client has sent data, then type == WStype_TEXT
     // try to decipher the JSON string received
     StaticJsonDocument<200> doc; // create a JSON container
     DeserializationError error = deserializeJson(doc, payload);

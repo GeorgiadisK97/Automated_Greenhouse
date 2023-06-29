@@ -17,7 +17,6 @@ private:
 public:
     DHT_L(uint8_t pin, uint8_t DHT_TYPE);
     virtual int read() override;
-    virtual bool check_data(int &DHT_THRESHOLD) override;
     void begin();
     virtual ~DHT_L() = default;
 };

@@ -85,18 +85,6 @@ void print_UI()
     lcd.print("W:" + window.state());
 }
 
-void init_flags()
-{
-    if (dht.read() > DHT_THRESHOLD)
-        temp_flag = true;
-    else
-        temp_flag = false;
-    if (hmd.read() > HMD_THRESHOLD)
-        hmd_flag = true;
-    else
-        hmd_flag = false;
-}
-
 void display_moisture(int &moisture)
 {
     if (moisture > 10)

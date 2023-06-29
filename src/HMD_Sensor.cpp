@@ -15,10 +15,3 @@ int HMD::read()
     digitalWrite(_pin2, LOW);
     return value;
 }
-
-bool HMD::check_data(int &HMD_THRESHOLD)
-{
-    int value;
-    value = read();
-    return (value > HMD_THRESHOLD ? true : false);
-}
