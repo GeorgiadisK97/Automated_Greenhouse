@@ -78,9 +78,9 @@ void setup()
   lcd.createChar(1, thermometer); // Custom character for Temperature
 
   dht.begin();
-  window.attach();
+  window.attach();   
 
-  current_temp_data = dht.read(); // READ DHT SENSOR DATA
+  current_temp_data = dht.read(); // Read DHT data
   display_temperature(current_temp_data);
   previous_temp_data = current_temp_data;
   if (!isnan(current_temp_data))
