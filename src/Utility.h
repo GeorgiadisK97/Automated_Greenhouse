@@ -75,39 +75,31 @@ byte thermometer[] = {
     B11111,
     B01110};
 
-void print_UI()
-{
-    lcd.setCursor(0, 0);
-    lcd.print("F:" + fan.state());
-    lcd.setCursor(6, 0);
-    lcd.print("P:" + pump.state());
-    lcd.setCursor(0, 1);
-    lcd.print("W:" + window.state());
-}
-
 void display_moisture(int &moisture)
 {
-    if (moisture > 10)
+    lcd.setCursor(0, 1);
+    lcd.print(String(HMD_THRESHOLD) + ":");
+    if (moisture >= 10)
     {
-        lcd.setCursor(12, 0);
+        lcd.setCursor(3, 1);
         lcd.print(moisture);
         lcd.print("%");
         lcd.write(0);
     }
     else
     {
-        lcd.setCursor(12, 0);
-        lcd.print(" ");
+        lcd.setCursor(3, 1);
         lcd.print(moisture);
         lcd.print("%");
         lcd.write(0);
+        lcd.print("  ");
     }
 }
 
 void display_temperature(int &temperature)
 {
-    lcd.setCursor(11, 1);
-    lcd.print(temperature, 1);
+    lcd.setCursor(8, 1);
+    lcd.print(String(DHT_THRESHOLD) + ":" + String(temperature));
     lcd.print(char(223));
     lcd.print("C");
     lcd.write(1);

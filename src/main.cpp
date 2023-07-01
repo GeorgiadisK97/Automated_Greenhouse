@@ -5,8 +5,8 @@
 #include "Utility.h"
 
 // WiFi credentials
-const char *SSID = "SSID";
-const char *PASSWORD = "PASSWORD";
+const char *SSID = "COSMOTE-458524";
+const char *PASSWORD = "ehm9mk3b5k4xk1ex";
 
 // The String below "webpage" contains the complete HTML code that is sent to the client whenever someone connects to the webserver
 String webpage = "<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' /><style>h1 {text-align: center;}p {text-align: center;}</style><title>Page Title</title></head><body style='background-color: #EEEEEE;'><span style='color: #003366;'><h1>Greenhouse</h1><p>Current Temperature Threshold: <span id='DHT_THRESHOLD'>-</span></p><p>Current Humidity Threshold: <span id='HMD_THRESHOLD'>-</span></p><p><label for='TEMP_THRESHOLD'>Temperature Threshold:</label><input type='number' id='TEMP_THRESHOLD' name='TEMP_THRESHOLD'<br><br></p><p><label for='HUMID_THRESHOLD'> Humidity Threshold:</label><input type='number' id='HUMID_THRESHOLD' name='HUMID_THRESHOLD'<br><br></p><p><button type='button' id='BTN_SEND_BACK'>Submit</button></p><p>PUMP_STATE: <span id='PUMP_STATE'>-</span></p><p>FAN_STATE: <span id='FAN_STATE'>-</span></p><p>WINDOW_STATE: <span id='WINDOW_STATE'>-</span></p></span></body><script> var Socket; document.getElementById('BTN_SEND_BACK').addEventListener('click', button_send_back); function init() { Socket = new WebSocket('ws://' + window.location.hostname + ':81/'); Socket.onmessage = function(event) { processCommand(event); }; } function button_send_back() { var msg = {DHT_THRESHOLD : document.getElementById('TEMP_THRESHOLD').value,HMD_THRESHOLD : document.getElementById('HUMID_THRESHOLD').value};Socket.send(JSON.stringify(msg)); } function processCommand(event) {var obj = JSON.parse(event.data);document.getElementById('DHT_THRESHOLD').innerHTML = obj.DHT_THRESHOLD;document.getElementById('HMD_THRESHOLD').innerHTML = obj.HMD_THRESHOLD;document.getElementById('PUMP_STATE').innerHTML = obj.PUMP_STATE;document.getElementById('FAN_STATE').innerHTML = obj.FAN_STATE;document.getElementById('WINDOW_STATE').innerHTML = obj.WINDOW_STATE; } window.onload = function(event) { init(); }</script></html>";
@@ -77,13 +77,17 @@ void setup()
   lcd.createChar(0, droplet);     // Custom character for Humidity
   lcd.createChar(1, thermometer); // Custom character for Temperature
 
+  // LCD
+  lcd.setCursor(2, 0);
+  lcd.print(WiFi.localIP());
+
   dht.begin();
-  window.attach();   
+  window.attach();
 
-  current_temp_data = dht.read();           // Read the data from the DHT
-  display_temperature(current_temp_data);   // Display on the LCD
+  current_temp_data = dht.read();         // Read the data from the DHT
+  display_temperature(current_temp_data); // Display on the LCD
 
-  if (!isnan(current_temp_data))            // Data validation
+  if (!isnan(current_temp_data)) // Data validation
   {
     if (current_temp_data >= DHT_THRESHOLD)
     {
@@ -104,8 +108,7 @@ void setup()
   }
 
   current_hmd_data = hmd.read();
-  display_moisture(current_hmd_data);   // Display on the LCD
-
+  display_moisture(current_hmd_data); // Display on the LCD
   if (!isnan(current_hmd_data))
   {
     if (current_hmd_data >= HMD_THRESHOLD)
@@ -123,7 +126,6 @@ void setup()
   {
     Serial.println("Error reading humidity.");
   }
-  print_UI();
 }
 
 void loop()
@@ -160,7 +162,6 @@ void loop()
           temp_flag = false;
           window.open();
           fan.open();
-          print_UI();
         }
       }
       else
@@ -170,7 +171,6 @@ void loop()
           temp_flag = true;
           window.close();
           fan.close();
-          print_UI();
         }
       }
     }
@@ -189,7 +189,6 @@ void loop()
         {
           hmd_flag = false;
           pump.close();
-          print_UI();
         }
       }
       else
@@ -198,7 +197,7 @@ void loop()
         {
           hmd_flag = true;
           pump.open();
-          print_UI();
+
         }
       }
     }
