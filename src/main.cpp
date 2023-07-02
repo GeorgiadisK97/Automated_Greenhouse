@@ -92,14 +92,14 @@ void setup()
     if (current_temp_data >= DHT_THRESHOLD)
     {
       temp_flag = false;
-      window.open();
       fan.open();
+      window.open();
     }
     else
     {
       temp_flag = true;
-      window.close();
       fan.close();
+      window.close();
     }
   }
   else
@@ -160,8 +160,8 @@ void loop()
         if (temp_flag)
         {
           temp_flag = false;
-          window.open();
           fan.open();
+          window.open();
         }
       }
       else
@@ -169,8 +169,8 @@ void loop()
         if (!temp_flag)
         {
           temp_flag = true;
-          window.close();
           fan.close();
+          window.close();
         }
       }
     }
