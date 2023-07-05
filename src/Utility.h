@@ -78,7 +78,14 @@ byte thermometer[] = {
 void display_moisture(int &moisture)
 {
     lcd.setCursor(0, 1);
-    lcd.print(String(HMD_THRESHOLD) + ":");
+    if (HMD_THRESHOLD <= 9)
+    {
+        lcd.print(" " + String(HMD_THRESHOLD) + ":");
+    }
+    else
+    {
+        lcd.print(String(HMD_THRESHOLD) + ":");
+    }
     if (moisture >= 10)
     {
         lcd.setCursor(3, 1);

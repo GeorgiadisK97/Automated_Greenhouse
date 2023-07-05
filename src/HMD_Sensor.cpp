@@ -11,7 +11,7 @@ int HMD::read()
     delay(10);
     int value;
     value = analogRead(_pin1);
-    value = map(value, 0, 1023, 0, 100);
+    value = map(value, 0, 1023, 0, 99);
     digitalWrite(_pin2, LOW);
     return value;
 }

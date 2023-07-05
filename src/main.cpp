@@ -5,7 +5,7 @@
 #include "Utility.h"
 
 // WiFi credentials
-const char *SSID = "COSMOTE-458524";
+const char *SSID = "COSMOTE-458524_EXT";
 const char *PASSWORD = "ehm9mk3b5k4xk1ex";
 
 // The String below "webpage" contains the complete HTML code that is sent to the client whenever someone connects to the webserver
@@ -43,6 +43,13 @@ bool hmd_flag{true};
 
 void setup()
 {
+  // LCD initialization
+  lcd.init();
+  lcd.backlight();
+  lcd.createChar(0, droplet);     // Custom character for Humidity
+  lcd.createChar(1, thermometer); // Custom character for Temperature
+  lcd.setCursor(0, 0);
+  lcd.print("Initializing...");
   Serial.begin(115200);
   Serial.print("Establishing network connection.(" + String(SSID) + ")");
 
@@ -64,20 +71,14 @@ void setup()
   webSocket.begin();                 // Start websocket
   webSocket.onEvent(webSocketEvent); // Define a callback function -> what does the ESP32 need to do when an event from the websocket is received? -> run function "webSocketEvent()"
 
-  // Configure pins
+  // Pin configuration
   pinMode(DHT_DATA_PIN, INPUT);
   pinMode(HMD_DATA_PIN, INPUT);
   pinMode(HMD_POWER_PIN, OUTPUT);
   pinMode(FAN_RELAY_PIN, OUTPUT);
   pinMode(PUMP_RELAY_PIN, OUTPUT);
 
-  // LCD initialization
-  lcd.init();
-  lcd.backlight();
-  lcd.createChar(0, droplet);     // Custom character for Humidity
-  lcd.createChar(1, thermometer); // Custom character for Temperature
-
-  // LCD
+  lcd.clear();
   lcd.setCursor(2, 0);
   lcd.print(WiFi.localIP());
 
@@ -155,7 +156,7 @@ void loop()
     display_temperature(current_temp_data);
     if (!isnan(current_temp_data)) // Data validation
     {
-      if (current_temp_data >= DHT_THRESHOLD)
+      if (current_temp_data >= DHT_THRESHOLD) 
       {
         if (temp_flag)
         {
@@ -164,7 +165,7 @@ void loop()
           window.open();
         }
       }
-      else
+      else if (current_temp_data <= DHT_THRESHOLD - 2)
       {
         if (!temp_flag)
         {
@@ -179,7 +180,7 @@ void loop()
       Serial.println("Error reading temperature");
     }
 
-    current_hmd_data = map(hmd.read(), 0, 360, 0, 100);
+    current_hmd_data = map(hmd.read(), 0, 380, 0, 99);
     display_moisture(current_hmd_data);
     if (!isnan(current_hmd_data))
     {
@@ -197,7 +198,6 @@ void loop()
         {
           hmd_flag = true;
           pump.open();
-
         }
       }
     }
