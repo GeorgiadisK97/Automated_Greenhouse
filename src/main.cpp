@@ -217,7 +217,6 @@ void webSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
     break;
   case WStype_CONNECTED: // If a client is connected, then type == WStype_CONNECTED
     Serial.println("Client " + String(num) + " connected");
-    // Optionally you can add code here what to do when connected
     break;
   case WStype_TEXT: // If a client has sent data, then type == WStype_TEXT
     // try to decipher the JSON string received
