@@ -1,6 +1,6 @@
 # Automated Greenhouse
 
-Controlling and monitoring a self-sustainable greenhouse using a custom website.
+Controlling and monitoring a self-sustainable greenhouse.
 
 ## Materials used
 
