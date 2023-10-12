@@ -5,7 +5,7 @@ Controlling and monitoring a self-sustainable greenhouse.
 ## Materials used
 
 1x DHT11 sensor for measuring the inside temperature.  
-1x Soil moisture sensor from sparkfun.  
+1x Soil moisture sensor.  
 1x 12V DC 1.96W fan.  
 1x 12V DC water pump.  
 1x 5V servo.  
