@@ -15,15 +15,17 @@ Controlling and monitoring a self-sustainable greenhouse.
 1x 5V 250mA external power supply.  
 1x esp32-c3-devkitC-02.
 
-
-## Circuit
 ## Explanation
 
-
+The current greenhouse consists of a couple of sensors and actuators.
+Τhe sensors read the data of the greenhouse environment and send it to the microprocessor for processing.
+When processing takes place the actuators are activated or deactivated according to the logic of the program.
+For example, if the temperature of the greenhouse is above the threshold, then the window opens with the help
+of a servo motor. Plus, a DC fan starts to spin until the inside temperature meets the desired limit.
 
 ## Future development
 
-The current greenhouse consists of a couple of sensors and acruators. It represents the base of a scalable construction. 
+ It represents the base of a scalable construction. 
 
 
 
