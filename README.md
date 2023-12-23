@@ -15,7 +15,7 @@ Controlling and monitoring a self-sustainable greenhouse.
 1x 5V 250mA external power supply.  
 1x esp32-c3-devkitC-02.
 
-## Explanation
+## Abstract 
 
 The current greenhouse consists of a couple of sensors and actuators.
 Τhe sensors read the data of the greenhouse environment and send it to the microprocessor for processing.
