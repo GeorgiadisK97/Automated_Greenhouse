@@ -3,21 +3,24 @@
 #include <WebSocketsServer.h>
 #include <ArduinoJson.h>
 #include "Utility.h"
+#include <stdio.h>
 
 // WiFi credentials
-const char *SSID = "SSID";
-const char *PASSWORD = "PASSWORD";
+const char *SSID = "COSMOTE-458524";
+const char *PASSWORD = "ehm9mk3b5k4xk1ex";
 
 // The String below "webpage" contains the complete HTML code that is sent to the client whenever someone connects to the webserver
-String webpage = "<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' /><style>h1 {text-align: center;}p {text-align: center;}</style><title>Page Title</title></head><body style='background-color: #EEEEEE;'><span style='color: #003366;'><h1>Greenhouse</h1><p>Current Temperature Threshold: <span id='DHT_THRESHOLD'>-</span></p><p>Current Humidity Threshold: <span id='HMD_THRESHOLD'>-</span></p><p><label for='TEMP_THRESHOLD'>Temperature Threshold:</label><input type='number' id='TEMP_THRESHOLD' name='TEMP_THRESHOLD'<br><br></p><p><label for='HUMID_THRESHOLD'> Humidity Threshold:</label><input type='number' id='HUMID_THRESHOLD' name='HUMID_THRESHOLD'<br><br></p><p><button type='button' id='BTN_SEND_BACK'>Submit</button></p><p>PUMP_STATE: <span id='PUMP_STATE'>-</span></p><p>FAN_STATE: <span id='FAN_STATE'>-</span></p><p>WINDOW_STATE: <span id='WINDOW_STATE'>-</span></p></span></body><script> var Socket; document.getElementById('BTN_SEND_BACK').addEventListener('click', button_send_back); function init() { Socket = new WebSocket('ws://' + window.location.hostname + ':81/'); Socket.onmessage = function(event) { processCommand(event); }; } function button_send_back() { var msg = {DHT_THRESHOLD : document.getElementById('TEMP_THRESHOLD').value,HMD_THRESHOLD : document.getElementById('HUMID_THRESHOLD').value};Socket.send(JSON.stringify(msg)); } function processCommand(event) {var obj = JSON.parse(event.data);document.getElementById('DHT_THRESHOLD').innerHTML = obj.DHT_THRESHOLD;document.getElementById('HMD_THRESHOLD').innerHTML = obj.HMD_THRESHOLD;document.getElementById('PUMP_STATE').innerHTML = obj.PUMP_STATE;document.getElementById('FAN_STATE').innerHTML = obj.FAN_STATE;document.getElementById('WINDOW_STATE').innerHTML = obj.WINDOW_STATE; } window.onload = function(event) { init(); }</script></html>";
+// String webpage = "<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' /><style>h1 {text-align: center;}p {text-align: center;}</style><title>Page Title</title></head><body style='background-color: #1e1e1e;'><span style='color: #00FF00;'><h1>Greenhouse</h1><p>Current Temperature Threshold: <span id='DHT_THRESHOLD'>-</span></p><p>Current Humidity Threshold: <span id='HMD_THRESHOLD'>-</span></p><p><label for='TEMP_THRESHOLD'>Temperature Threshold:</label><input type='number' id='TEMP_THRESHOLD' name='TEMP_THRESHOLD'<br><br></p><p><label for='HUMID_THRESHOLD'> Humidity Threshold:</label><input type='number' id='HUMID_THRESHOLD' name='HUMID_THRESHOLD'<br><br></p><p><button type='button' id='BTN_SEND_BACK'>Submit</button></p><p>PUMP_STATE: <span id='PUMP_STATE'>-</span></p><p>FAN_STATE: <span id='FAN_STATE'>-</span></p><p>WINDOW_STATE: <span id='WINDOW_STATE'>-</span></p></span></body><script> var Socket; document.getElementById('BTN_SEND_BACK').addEventListener('click', button_send_back); function init() { Socket = new WebSocket('ws://' + window.location.hostname + ':81/'); Socket.onmessage = function(event) { processCommand(event); }; } function button_send_back() { var msg = {DHT_THRESHOLD : document.getElementById('TEMP_THRESHOLD').value,HMD_THRESHOLD : document.getElementById('HUMID_THRESHOLD').value};Socket.send(JSON.stringify(msg)); } function processCommand(event) {var obj = JSON.parse(event.data);document.getElementById('DHT_THRESHOLD').innerHTML = obj.DHT_THRESHOLD;document.getElementById('HMD_THRESHOLD').innerHTML = obj.HMD_THRESHOLD;document.getElementById('PUMP_STATE').innerHTML = obj.PUMP_STATE;document.getElementById('FAN_STATE').innerHTML = obj.FAN_STATE;document.getElementById('WINDOW_STATE').innerHTML = obj.WINDOW_STATE; } window.onload = function(event) { init(); }</script></html>";
 
+FILE *pfile = NULL;
+const char *webpage = "C:\\Users\\konstandinos\\Documents\\PlatformIO\\Projects\\AutoGH\\src\\index.html";
 // We want to periodically send values to the clients, so we need to define an "interval" and remember the last time we sent data to the client (with "previousMillis")
 int interval = 1000;              // Send data to the client every 1000ms -> 1s
 unsigned long previousMillis = 0; // We use the "millis()" command for time reference and this will output an unsigned long
 
 // Initialization of webserver and websocket
-WebServer server(80);                              // The server uses port 80 (standard port for websites
-WebSocketsServer webSocket = WebSocketsServer(81); // The websocket uses port 81 (standard port for websockets
+WebServer server(80);                              // The server uses port 80 standard port for websites
+WebSocketsServer webSocket = WebSocketsServer(81); // The websocket uses port 81 standard port for websockets
 
 void webSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length);
 
@@ -43,6 +46,14 @@ bool hmd_flag{true};
 
 void setup()
 {
+  pfile = fopen(webpage, "r");
+  if (pfile == NULL)
+  {
+    Serial.println("Failed to open");
+  }
+  else
+    Serial.println("File opened");
+
   // LCD initialization
   lcd.init();
   lcd.backlight();
@@ -85,12 +96,12 @@ void setup()
   dht.begin();
   window.attach();
 
-  current_temp_data = dht.read();         // Read the data from the DHT
+  current_temp_data = abs(dht.read());         // Read the data from the DHT
   display_temperature(current_temp_data); // Display on the LCD
 
   if (!isnan(current_temp_data)) // Data validation
   {
-    if (current_temp_data >= DHT_THRESHOLD)
+    if ((current_temp_data) >= DHT_THRESHOLD)
     {
       temp_flag = false;
       fan.open();
@@ -108,7 +119,7 @@ void setup()
     Serial.println("Error reading temperature");
   }
 
-  current_hmd_data = hmd.read();
+  current_hmd_data = abs(hmd.read());
   display_moisture(current_hmd_data); // Display on the LCD
   if (!isnan(current_hmd_data))
   {
@@ -156,7 +167,7 @@ void loop()
     display_temperature(current_temp_data);
     if (!isnan(current_temp_data)) // Data validation
     {
-      if (current_temp_data >= DHT_THRESHOLD) 
+      if (current_temp_data >= DHT_THRESHOLD)
       {
         if (temp_flag)
         {
